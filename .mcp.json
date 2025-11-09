@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "demo": {
+      "command": "uv",
+      "args": ["run", "mcp", "run", "server.py"],
+      "env": {}
+    }
+  }
+}
