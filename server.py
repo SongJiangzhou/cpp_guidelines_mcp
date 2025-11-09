@@ -1,8 +1,11 @@
 """
-FastMCP quickstart example.
+FastMCP server with network support via SSE.
 
-cd to the `examples/snippets/clients` directory and run:
-    uv run server fastmcp_quickstart stdio
+Run locally with stdio:
+    uv run mcp run server.py
+
+Run as network server:
+    uv run mcp run server.py --transport sse --port 8000
 """
 
 from mcp.server.fastmcp import FastMCP

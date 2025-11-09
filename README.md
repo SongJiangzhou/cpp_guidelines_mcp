@@ -12,26 +12,39 @@ uv sync
 
 ### 2. 运行服务器
 
+**本地模式**:
 ```bash
-# 使用 MCP CLI
 uv run mcp run server.py
-
-# 或使用 stdio 传输
-uv run server fastmcp_quickstart stdio
 ```
 
-### 3. 在 Claude Code 中使用
+**网络模式** (供他人远程使用):
+```bash
+# 局域网访问
+uv run mcp run server.py --transport sse --host 0.0.0.0 --port 8000
 
-项目已包含 `.mcp.json` 配置文件，Claude Code 会自动识别。
+# 公网访问 (推荐使用 Cloudflare Tunnel)
+cloudflared tunnel --url http://localhost:8000
+```
 
-**验证安装：**
+### 3. 连接到服务器
+
+**本地连接** (stdio 模式):
+```bash
+claude mcp add --transport stdio demo -- uv run mcp run server.py
+```
+
+**远程连接** (网络模式):
+```bash
+# 局域网
+claude mcp add --transport sse demo http://192.168.1.100:8000/sse
+
+# 公网 (Cloudflare Tunnel)
+claude mcp add --transport sse demo https://xxx.trycloudflare.com/sse
+```
+
+**验证连接**:
 ```bash
 claude mcp list
-```
-
-或在 Claude Code 对话中输入：
-```
-/mcp
 ```
 
 ## 功能特性
@@ -57,6 +70,40 @@ mcp-server-demo/
 ├── pyproject.toml     # Python 项目配置
 ├── CLAUDE.md          # Claude Code 使用指南
 └── MCP_USAGE.md       # .mcp.json 详细使用说明
+```
+
+## 网络分享配置
+
+### 三种分享方式
+
+| 方式 | 适用场景 | 命令 |
+|------|----------|------|
+| **局域网** | 团队内网 | `--host 0.0.0.0 --port 8000` |
+| **Cloudflare Tunnel** | 公网访问(推荐) | `cloudflared tunnel --url http://localhost:8000` |
+| **SSH 隧道** | 临时测试 | `ssh -L 8000:localhost:8000 user@server` |
+
+### 安全建议
+
+**生产环境必须启用认证**:
+```bash
+export MCP_AUTH_TOKEN="your-secret-token"
+uv run mcp run server.py --transport sse --port 8000
+```
+
+客户端连接:
+```bash
+claude mcp add --transport sse demo http://server:8000/sse \
+  --header "Authorization: Bearer your-secret-token"
+```
+
+### 测试连接
+
+```bash
+# 测试服务器运行状态
+curl http://localhost:8000/health
+
+# 测试 SSE 端点
+curl -N http://localhost:8000/sse
 ```
 
 ## 文档

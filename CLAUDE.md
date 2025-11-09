@@ -20,14 +20,22 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## 开发命令
 
 ### 运行 MCP 服务器
+
+**本地模式 (stdio)**:
 ```bash
 uv run mcp run server.py
 ```
 
-或使用 stdio 传输：
+**网络模式 (SSE)**:
 ```bash
-uv run server fastmcp_quickstart stdio
+# 本地开发
+uv run mcp run server.py --transport sse --port 8000
+
+# 允许外部访问
+uv run mcp run server.py --transport sse --host 0.0.0.0 --port 8000
 ```
+
+详细的网络分享配置请参考 [README.md](./README.md#网络分享配置)
 
 ### 依赖管理
 项目使用 `uv` 作为包管理器：
@@ -66,13 +74,30 @@ uv add <package-name>
 
 ### 本地安装（仅当前项目可用）
 
+**stdio 模式**:
 ```bash
 claude mcp add --transport stdio demo -- uv run mcp run server.py
+```
+
+**网络模式 (连接远程服务器)**:
+```bash
+# 连接到远程 MCP 服务器
+claude mcp add --transport sse demo http://[服务器IP]:8000/sse
+
+# 示例: 连接到本地网络服务器
+claude mcp add --transport sse demo http://192.168.1.100:8000/sse
 ```
 
 ### 项目共享配置
 
 项目已包含 `.mcp.json` 配置文件，团队成员可直接使用。配置会自动被 Claude Code 识别。
+
+### 网络分享给他人使用
+
+参考 [README.md 网络分享配置](./README.md#网络分享配置) 了解:
+- 局域网/公网访问配置
+- 安全认证设置
+- 连接测试方法
 
 ### 验证安装
 
