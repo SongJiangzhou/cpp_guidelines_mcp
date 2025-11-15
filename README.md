@@ -1,5 +1,7 @@
 # C++ Style Guide MCP Server
 
+[![smithery badge](https://smithery.ai/badge/@SongJiangzhou/cpp_guidelines)](https://smithery.ai/server/@SongJiangzhou/cpp_guidelines)
+
 专业的 C++ 编码规范检查和最佳实践建议工具，基于 MCP (Model Context Protocol) 协议构建。
 
 ## 功能特性
