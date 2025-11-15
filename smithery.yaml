@@ -1,28 +1,5 @@
 # Smithery 配置文件
 # 文档: https://smithery.ai/docs/build/project-config/smithery-yaml
 
-# 使用容器运行时 (支持 Python)
-runtime: "container"
-
-# 构建配置
-build:
-  dockerfile: "Dockerfile"
-  dockerBuildPath: "."
-
-# 启动命令配置
-startCommand:
-  type: "stdio"
-
-# 配置模式 (当前不需要额外配置参数)
-configSchema:
-  type: "object"
-  properties: {}
-  required: []
-
-# 命令函数: 定义如何启动 MCP 服务器
-commandFunction: |-
-  (config) => ({
-    command: 'uv',
-    args: ['run', 'mcp', 'run', 'cpp_style_server.py'],
-    env: {}
-  })
+# 使用 Python 运行时
+runtime: "python"
