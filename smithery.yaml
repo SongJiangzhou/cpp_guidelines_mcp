@@ -1,5 +1,15 @@
 # Smithery 配置文件
 # 文档: https://smithery.ai/docs/build/project-config/smithery-yaml
 
-# 使用 Python 运行时
-runtime: "python"
+# 使用容器运行时
+runtime: "container"
+
+# Docker 构建配置
+build:
+  dockerfile: "Dockerfile"
+  dockerBuildPath: "."
+
+# HTTP 启动命令配置
+startCommand:
+  type: "http"
+  configSchema: {}

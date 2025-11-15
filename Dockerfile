@@ -1,32 +1,52 @@
-# 使用 uv 官方镜像 (Python 3.12 Alpine)
-FROM ghcr.io/astral-sh/uv:python3.12-alpine
+# 多阶段构建 - 构建阶段
+FROM ghcr.io/astral-sh/uv:0.5.16 AS builder
 
-# 设置工作目录
 WORKDIR /app
 
-# 优化 uv 配置
-ENV UV_COMPILE_BYTECODE=1
-ENV UV_LINK_MODE=copy
+# 复制项目文件
+COPY . .
 
-# 安装项目依赖 (不包括项目本身)
-# 使用 cache mount 加速构建
-RUN --mount=type=cache,target=/root/.cache/uv \
-    --mount=type=bind,source=uv.lock,target=uv.lock \
-    --mount=type=bind,source=pyproject.toml,target=pyproject.toml \
-    uv sync --locked --no-install-project --no-dev
+# 复制 uv 到构建器
+COPY --from=ghcr.io/astral-sh/uv:0.5.16 /uv /bin/uv
 
-# 复制整个项目
-COPY . /app
+# 安装依赖
+RUN if [ -f "uv.lock" ]; then \
+      echo "Using uv with uv.lock" && \
+      export UV_COMPILE_BYTECODE=1 UV_LINK_MODE=copy && \
+      uv sync --frozen --no-dev; \
+    elif [ -f "poetry.lock" ]; then \
+      echo "Using poetry with poetry.lock" && \
+      export PYTHONUNBUFFERED=1 \
+        PYTHONDONTWRITEBYTECODE=1 \
+        PIP_NO_CACHE_DIR=off \
+        PIP_DISABLE_PIP_VERSION_CHECK=on \
+        POETRY_HOME="/opt/poetry" \
+        POETRY_VIRTUALENVS_IN_PROJECT=true \
+        POETRY_NO_INTERACTION=1 && \
+      export PATH="$POETRY_HOME/bin:/usr/local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin" && \
+      pip install poetry && \
+      poetry install --no-dev; \
+    else \
+      echo "Using uv with pyproject.toml" && \
+      export UV_COMPILE_BYTECODE=1 UV_LINK_MODE=copy && \
+      uv sync --no-dev; \
+    fi
 
-# 安装项目 (包括项目本身)
-RUN --mount=type=cache,target=/root/.cache/uv \
-    uv sync --locked --no-dev
+# 运行时阶段
+FROM python:3.12-slim-bookworm AS base
 
-# 将虚拟环境添加到 PATH
+WORKDIR /app
+
+# 从构建阶段复制应用
+COPY --from=builder /app /app
+
+# 设置环境变量
 ENV PATH="/app/.venv/bin:$PATH"
+ENV PYTHONUNBUFFERED=1
+ENV MCP_TRANSPORT=streamable-http
 
-# 清空 ENTRYPOINT (允许 smithery.yaml 中的 commandFunction 控制启动)
-ENTRYPOINT []
+# Smithery 会设置 PORT 环境变量
+EXPOSE ${PORT:-8000}
 
-# 默认启动命令
-CMD ["uv", "run", "mcp", "run", "cpp_style_server.py"]
+# 启动 MCP 服务器
+CMD ["python", "cpp_style_server.py"]

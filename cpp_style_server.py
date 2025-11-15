@@ -395,4 +395,22 @@ def refactor_suggestion(target_standard: str = "cpp17") -> str:
 
 # 启动服务器（仅在直接运行时）
 if __name__ == "__main__":
-    mcp.run()
+    import os
+
+    # 从环境变量检测运行模式，默认为 stdio
+    # Smithery 部署时使用 streamable-http，本地开发使用 stdio
+    transport = os.environ.get("MCP_TRANSPORT", "stdio")
+
+    if transport == "streamable-http":
+        # HTTP 模式：使用 uvicorn 手动启动以支持 PORT 环境变量
+        import uvicorn
+        port = int(os.environ.get("PORT", "8000"))
+
+        # 获取 FastMCP 的 streamable HTTP 应用
+        app = mcp.streamable_http_app
+
+        # 启动服务器
+        uvicorn.run(app, host="0.0.0.0", port=port)
+    else:
+        # stdio 模式：使用标准方式启动
+        mcp.run(transport=transport)
