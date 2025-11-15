@@ -6,6 +6,12 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 这是一个 MCP (Model Context Protocol) 服务器演示项目，使用 FastMCP 框架构建。MCP 是一个用于 AI 模型与外部工具、资源和提示交互的协议。
 
+## 语言规范
+- 所有对话和文档都使用中文
+- 注释使用中文
+- 错误提示使用中文
+- 文档使用中文Markdown格式
+
 ## 核心架构
 
 **server.py** - 主要的 MCP 服务器实现

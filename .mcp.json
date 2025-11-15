@@ -1,8 +1,8 @@
 {
   "mcpServers": {
-    "demo": {
+    "cpp-style": {
       "command": "uv",
-      "args": ["run", "mcp", "run", "server.py"],
+      "args": ["run", "mcp", "run", "cpp_style_server.py"],
       "env": {}
     }
   }
