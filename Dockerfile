@@ -1,13 +1,13 @@
 # 多阶段构建 - 构建阶段
-FROM ghcr.io/astral-sh/uv:0.5.16 AS builder
+FROM python:3.12-slim-bookworm AS builder
 
 WORKDIR /app
 
+# 从 uv 镜像复制 uv 二进制文件
+COPY --from=ghcr.io/astral-sh/uv:0.5.16 /uv /bin/uv
+
 # 复制项目文件
 COPY . .
-
-# 复制 uv 到构建器
-COPY --from=ghcr.io/astral-sh/uv:0.5.16 /uv /bin/uv
 
 # 安装依赖
 RUN if [ -f "uv.lock" ]; then \
@@ -16,14 +16,6 @@ RUN if [ -f "uv.lock" ]; then \
       uv sync --frozen --no-dev; \
     elif [ -f "poetry.lock" ]; then \
       echo "Using poetry with poetry.lock" && \
-      export PYTHONUNBUFFERED=1 \
-        PYTHONDONTWRITEBYTECODE=1 \
-        PIP_NO_CACHE_DIR=off \
-        PIP_DISABLE_PIP_VERSION_CHECK=on \
-        POETRY_HOME="/opt/poetry" \
-        POETRY_VIRTUALENVS_IN_PROJECT=true \
-        POETRY_NO_INTERACTION=1 && \
-      export PATH="$POETRY_HOME/bin:/usr/local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin" && \
       pip install poetry && \
       poetry install --no-dev; \
     else \
@@ -33,11 +25,11 @@ RUN if [ -f "uv.lock" ]; then \
     fi
 
 # 运行时阶段
-FROM python:3.12-slim-bookworm AS base
+FROM python:3.12-slim-bookworm
 
 WORKDIR /app
 
-# 从构建阶段复制应用
+# 从构建阶段复制应用和虚拟环境
 COPY --from=builder /app /app
 
 # 设置环境变量
