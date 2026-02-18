@@ -4,9 +4,11 @@ C++ 编码规范 MCP 服务器
 提供 C++ 代码规范检查、最佳实践建议和代码审查支持。
 """
 
+import os
+
 from mcp.server.fastmcp import FastMCP
 from starlette.requests import Request
-from starlette.responses import JSONResponse
+from starlette.responses import JSONResponse, RedirectResponse
 
 # 导入工具模块
 from cpp_style.tools.naming_checker import get_checker as get_naming_checker
@@ -25,8 +27,47 @@ from cpp_style.resources.design_patterns import get_resource as get_patterns_res
 from cpp_style.prompts.code_review import get_prompt as get_code_review_prompt
 from cpp_style.prompts.refactor_suggestion import get_prompt as get_refactor_prompt
 
+# ==================== OAuth 配置 ====================
+
+# GitHub OAuth 环境变量（在 Railway 中配置）
+_GITHUB_CLIENT_ID = os.environ.get("GITHUB_CLIENT_ID", "")
+_GITHUB_CLIENT_SECRET = os.environ.get("GITHUB_CLIENT_SECRET", "")
+# MCP 服务器公开 URL（Railway 部署地址或自定义域名）
+_MCP_SERVER_URL = os.environ.get(
+    "MCP_SERVER_URL",
+    "https://cppguidelinesmcp-production.up.railway.app",
+)
+
+_oauth_provider = None
+_auth_settings = None
+
+if _GITHUB_CLIENT_ID and _GITHUB_CLIENT_SECRET:
+    from mcp.server.auth.settings import AuthSettings, ClientRegistrationOptions
+    from mcp.server.auth.provider import ProviderTokenVerifier
+    from cpp_style.auth.github_provider import GitHubOAuthProvider
+
+    _oauth_provider = GitHubOAuthProvider(
+        github_client_id=_GITHUB_CLIENT_ID,
+        github_client_secret=_GITHUB_CLIENT_SECRET,
+        mcp_server_url=_MCP_SERVER_URL,
+    )
+    _auth_settings = AuthSettings(
+        issuer_url=_MCP_SERVER_URL,  # type: ignore[arg-type]
+        resource_server_url=_MCP_SERVER_URL,  # type: ignore[arg-type]
+        client_registration_options=ClientRegistrationOptions(
+            enabled=True,
+            valid_scopes=["mcp"],
+            default_scopes=["mcp"],
+        ),
+    )
+
 # 创建 MCP 服务器实例
-mcp = FastMCP("C++ Style Guide Server")
+mcp = FastMCP(
+    "C++ Style Guide Server",
+    auth_server_provider=_oauth_provider,
+    token_verifier=ProviderTokenVerifier(_oauth_provider) if _oauth_provider else None,
+    auth=_auth_settings,
+)
 
 
 # ==================== Custom Routes ====================
@@ -34,7 +75,31 @@ mcp = FastMCP("C++ Style Guide Server")
 @mcp.custom_route("/health", methods=["GET"])
 async def health_check(request: Request) -> JSONResponse:
     """健康检查端点（供 Railway 等平台使用）"""
-    return JSONResponse({"status": "ok", "service": "cpp-style-guide-mcp"})
+    auth_enabled = _oauth_provider is not None
+    return JSONResponse({
+        "status": "ok",
+        "service": "cpp-style-guide-mcp",
+        "auth": "github" if auth_enabled else "disabled",
+    })
+
+
+@mcp.custom_route("/oauth/callback", methods=["GET"])
+async def oauth_callback(request: Request) -> RedirectResponse | JSONResponse:
+    """GitHub OAuth 回调处理（GitHub 授权后重定向到此路由）"""
+    if _oauth_provider is None:
+        return JSONResponse({"error": "OAuth 未启用"}, status_code=400)
+
+    code = request.query_params.get("code")
+    state = request.query_params.get("state")
+
+    if not code or not state:
+        return JSONResponse({"error": "缺少 code 或 state 参数"}, status_code=400)
+
+    try:
+        redirect_url = await _oauth_provider.handle_github_callback(code, state)
+        return RedirectResponse(url=redirect_url, status_code=302)
+    except ValueError as e:
+        return JSONResponse({"error": str(e)}, status_code=400)
 
 
 # ==================== Tools ====================
@@ -280,8 +345,6 @@ def refactor_suggestion(target_standard: str = "cpp17") -> str:
 
 # 启动服务器（仅在直接运行时）
 if __name__ == "__main__":
-    import os
-
     # 从环境变量检测运行模式，默认为 stdio
     # Smithery 部署时使用 streamable-http，本地开发使用 stdio
     transport = os.environ.get("MCP_TRANSPORT", "stdio")
