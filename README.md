@@ -1,3 +1,5 @@
+[中文](README_zh.md) | English
+
 # C++ Style Guide MCP Server
 
 Enforce consistent C++ style and best practices across your codebase. Analyze naming conventions, memory safety, and const correctness, and get actionable modernization suggestions up to C++23. Accelerate reviews with ready-made prompts and quick access to curated guidelines.
