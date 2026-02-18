@@ -6,8 +6,10 @@ C++ 编码规范 MCP 服务器
 
 import os
 from pathlib import Path
+from typing import Literal
 
 from mcp.server.fastmcp import FastMCP
+from mcp.types import ToolAnnotations
 from starlette.requests import Request
 from starlette.responses import FileResponse, JSONResponse, RedirectResponse
 
@@ -117,22 +119,23 @@ async def oauth_callback(request: Request) -> RedirectResponse | JSONResponse:
 
 # ==================== Tools ====================
 
-@mcp.tool()
-def check_naming(identifier: str, category: str) -> str:
+_READ_ONLY = ToolAnnotations(readOnlyHint=True, destructiveHint=False, idempotentHint=True, openWorldHint=False)
+
+
+@mcp.tool(
+    description="Check whether a C++ identifier follows naming conventions. Validates variables, constants, functions, classes, namespaces, member variables, template parameters, and file names against established C++ style guidelines. Returns whether the identifier is valid, a detailed explanation, and suggested alternatives if it violates the rules.",
+    annotations=_READ_ONLY,
+)
+def check_naming(
+    identifier: str,
+    category: Literal["variable", "constant", "function", "class", "namespace", "member_variable", "template_parameter", "file_naming"],
+) -> str:
     """
     检查 C++ 标识符命名是否符合规范
 
     参数:
         identifier: 要检查的标识符名称
-        category: 标识符类别，可选值:
-                 - variable: 变量
-                 - constant: 常量
-                 - function: 函数
-                 - class: 类
-                 - namespace: 命名空间
-                 - member_variable: 成员变量
-                 - template_parameter: 模板参数
-                 - file_naming: 文件命名
+        category: 标识符类别（variable/constant/function/class/namespace/member_variable/template_parameter/file_naming）
 
     返回:
         检查结果，包含是否符合规范、详细说明和建议
@@ -149,7 +152,10 @@ def check_naming(identifier: str, category: str) -> str:
     return result
 
 
-@mcp.tool()
+@mcp.tool(
+    description="Check whether a C++ header file has correct include guards or #pragma once directives. Detects missing guards, malformed macro names, mismatched #endif comments, and suggests correctly formatted guard macros based on the file path.",
+    annotations=_READ_ONLY,
+)
 def check_include_guard(code: str, file_path: str = "") -> str:
     """
     检查 C++ 头文件的包含保护是否正确
@@ -175,7 +181,10 @@ def check_include_guard(code: str, file_path: str = "") -> str:
     return result
 
 
-@mcp.tool()
+@mcp.tool(
+    description="Analyze C++ code for memory safety issues including memory leaks, dangling pointers, double-free errors, use of raw owning pointers, missing RAII patterns, and unsafe array operations. Returns a detailed report with line-level findings and recommendations to use modern C++ alternatives like smart pointers.",
+    annotations=_READ_ONLY,
+)
 def analyze_memory_safety(code: str) -> str:
     """
     分析 C++ 代码中的内存安全问题
@@ -191,19 +200,20 @@ def analyze_memory_safety(code: str) -> str:
     return report
 
 
-@mcp.tool()
-def suggest_modern_cpp(code: str, target_standard: str = "cpp17") -> str:
+@mcp.tool(
+    description="Suggest how to modernize C++ code to use features from a target standard (C++11 through C++23). Identifies outdated patterns such as raw loops replaceable by range-for, C-style casts, manual memory management, pre-C++11 type aliases, and suggests concrete rewrites using modern idioms like auto, structured bindings, std::optional, concepts, and ranges.",
+    annotations=_READ_ONLY,
+)
+def suggest_modern_cpp(
+    code: str,
+    target_standard: Literal["cpp11", "cpp14", "cpp17", "cpp20", "cpp23"] = "cpp17",
+) -> str:
     """
     建议将代码升级为现代 C++ 写法
 
     参数:
         code: 要分析的 C++ 代码
-        target_standard: 目标 C++ 标准，可选值:
-                        - cpp11: C++11
-                        - cpp14: C++14
-                        - cpp17: C++17 (默认)
-                        - cpp20: C++20
-                        - cpp23: C++23
+        target_standard: 目标 C++ 标准（cpp11/cpp14/cpp17/cpp20/cpp23，默认 cpp17）
 
     返回:
         现代化建议报告，包括可以使用的新特性和重写示例
@@ -213,7 +223,10 @@ def suggest_modern_cpp(code: str, target_standard: str = "cpp17") -> str:
     return report
 
 
-@mcp.tool()
+@mcp.tool(
+    description="Check C++ code for const correctness issues. Identifies member functions that do not modify state but are missing the const qualifier, non-const references where const references would suffice, and variables that are never modified but not declared const. Returns a report with specific locations and suggested fixes.",
+    annotations=_READ_ONLY,
+)
 def check_const_correctness(code: str) -> str:
     """
     检查 C++ 代码中的 const 正确性

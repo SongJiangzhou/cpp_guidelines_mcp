@@ -11,6 +11,12 @@
     {
       "name": "check_naming",
       "description": "Check whether a C++ identifier follows naming conventions. Validates variables, constants, functions, classes, namespaces, member variables, template parameters, and file names against established C++ style guidelines. Returns whether the identifier is valid, a detailed explanation, and suggested alternatives if it violates the rules.",
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      },
       "inputSchema": {
         "type": "object",
         "properties": {
@@ -30,6 +36,12 @@
     {
       "name": "check_include_guard",
       "description": "Check whether a C++ header file has correct include guards or #pragma once directives. Detects missing guards, malformed macro names, mismatched #endif comments, and suggests correctly formatted guard macros based on the file path.",
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      },
       "inputSchema": {
         "type": "object",
         "properties": {
@@ -48,6 +60,12 @@
     {
       "name": "analyze_memory_safety",
       "description": "Analyze C++ code for memory safety issues including memory leaks, dangling pointers, double-free errors, use of raw owning pointers, missing RAII patterns, and unsafe array operations. Returns a detailed report with line-level findings and recommendations to use modern C++ alternatives like smart pointers.",
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      },
       "inputSchema": {
         "type": "object",
         "properties": {
@@ -62,6 +80,12 @@
     {
       "name": "suggest_modern_cpp",
       "description": "Suggest how to modernize C++ code to use features from a target standard (C++11 through C++23). Identifies outdated patterns such as raw loops replaceable by range-for, C-style casts, manual memory management, pre-C++11 type aliases, and suggests concrete rewrites using modern idioms like auto, structured bindings, std::optional, concepts, and ranges.",
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      },
       "inputSchema": {
         "type": "object",
         "properties": {
@@ -81,6 +105,12 @@
     {
       "name": "check_const_correctness",
       "description": "Check C++ code for const correctness issues. Identifies member functions that do not modify state but are missing the const qualifier, non-const references where const references would suffice, and variables that are never modified but not declared const. Returns a report with specific locations and suggested fixes.",
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      },
       "inputSchema": {
         "type": "object",
         "properties": {
@@ -118,11 +148,25 @@
   "prompts": [
     {
       "name": "code_review",
-      "description": "Generate a C++ code review prompt template focused on a specific aspect: general, performance, safety, readability, or modern C++ features."
+      "description": "Generate a C++ code review prompt template focused on a specific aspect: general, performance, safety, readability, or modern C++ features.",
+      "arguments": [
+        {
+          "name": "focus",
+          "description": "Review focus: general, performance, safety, readability, or modern",
+          "required": false
+        }
+      ]
     },
     {
       "name": "refactor_suggestion",
-      "description": "Generate a C++ refactoring suggestion prompt targeting a specific C++ standard from cpp11 to cpp23."
+      "description": "Generate a C++ refactoring suggestion prompt targeting a specific C++ standard from cpp11 to cpp23.",
+      "arguments": [
+        {
+          "name": "target_standard",
+          "description": "Target C++ standard: cpp11, cpp14, cpp17, cpp20, or cpp23",
+          "required": false
+        }
+      ]
     }
   ]
 }
