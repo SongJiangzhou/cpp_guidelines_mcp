@@ -2,13 +2,13 @@
 # 文档: https://smithery.ai/docs/build/publish
 #
 # 部署方式：Railway 托管 + Smithery URL 方式发布
-# Railway 部署地址: https://cppguidelinesmcp-production.up.railway.app
-# MCP 端点:        https://cppguidelinesmcp-production.up.railway.app/mcp
+# Fly.io 部署地址: https://cpp-style-guide-mcp.fly.dev
+# MCP 端点:        https://cpp-style-guide-mcp.fly.dev/mcp
 #
 # 注册到 Smithery（只需执行一次）:
 #   npx @smithery/cli deploy \
 #     --name @<your-smithery-username>/cpp-style-guide-mcp \
-#     --url https://cppguidelinesmcp-production.up.railway.app/mcp
+#     --url https://cpp-style-guide-mcp.fly.dev/mcp
 #
 # 本地安装（stdio 模式，供用户在本地运行）:
 startCommand:

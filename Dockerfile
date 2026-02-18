@@ -37,8 +37,8 @@ ENV PATH="/app/.venv/bin:$PATH"
 ENV PYTHONUNBUFFERED=1
 ENV MCP_TRANSPORT=streamable-http
 
-# Smithery 会设置 PORT 环境变量
-EXPOSE ${PORT:-8000}
+# PORT 由部署平台通过环境变量注入（Fly.io 默认 8080）
+EXPOSE ${PORT:-8080}
 
 # 启动 MCP 服务器
 CMD ["python", "cpp_style_server.py"]

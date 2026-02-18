@@ -3,7 +3,7 @@
     "name": "C++ Style Guide MCP",
     "version": "0.1.0",
     "description": "C++ 编码规范检查、最佳实践建议和代码审查支持的 MCP 服务器",
-    "icon": "https://raw.githubusercontent.com/lv5railgun/cpp_guidelines/main/icon.png"
+    "icon": "https://raw.githubusercontent.com/SongJiangzhou/cpp_guidelines_mcp/main/icon.png"
   },
   "authentication": {
     "type": "none"

@@ -36,7 +36,7 @@ _GITHUB_CLIENT_SECRET = os.environ.get("GITHUB_CLIENT_SECRET", "")
 # MCP 服务器公开 URL（Railway 部署地址或自定义域名）
 _MCP_SERVER_URL = os.environ.get(
     "MCP_SERVER_URL",
-    "https://cppguidelinesmcp-production.up.railway.app",
+    "https://cpp-style-guide-mcp.fly.dev",
 )
 
 _oauth_provider = None
