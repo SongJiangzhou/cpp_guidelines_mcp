@@ -5,6 +5,8 @@ C++ 编码规范 MCP 服务器
 """
 
 from mcp.server.fastmcp import FastMCP
+from starlette.requests import Request
+from starlette.responses import JSONResponse
 
 # 导入工具模块
 from cpp_style.tools.naming_checker import get_checker as get_naming_checker
@@ -25,6 +27,14 @@ from cpp_style.prompts.refactor_suggestion import get_prompt as get_refactor_pro
 
 # 创建 MCP 服务器实例
 mcp = FastMCP("C++ Style Guide Server")
+
+
+# ==================== Custom Routes ====================
+
+@mcp.custom_route("/health", methods=["GET"])
+async def health_check(request: Request) -> JSONResponse:
+    """健康检查端点（供 Railway 等平台使用）"""
+    return JSONResponse({"status": "ok", "service": "cpp-style-guide-mcp"})
 
 
 # ==================== Tools ====================
@@ -279,21 +289,11 @@ if __name__ == "__main__":
     if transport == "streamable-http":
         # HTTP 模式：使用 uvicorn 手动启动以支持 PORT 环境变量
         import uvicorn
-        from starlette.applications import Starlette
-        from starlette.responses import JSONResponse
-        from starlette.routing import Mount, Route
 
         port = int(os.environ.get("PORT", "8000"))
 
-        # 健康检查端点（供 Railway 等平台使用）
-        async def health(request):
-            return JSONResponse({"status": "ok", "service": "cpp-style-guide-mcp"})
-
-        # 用 Starlette 包装，挂载健康检查和 MCP 应用
-        app = Starlette(routes=[
-            Route("/health", health),
-            Mount("/", app=mcp.streamable_http_app),
-        ])
+        # 获取 FastMCP 的 streamable HTTP 应用（已包含 /health 自定义路由）
+        app = mcp.streamable_http_app()
 
         # 启动服务器
         uvicorn.run(app, host="0.0.0.0", port=port)
