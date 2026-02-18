@@ -98,6 +98,15 @@ async def server_card(request: Request) -> FileResponse | JSONResponse:
     return JSONResponse({"error": "server-card.json 未找到"}, status_code=404)
 
 
+@mcp.custom_route("/icon.svg", methods=["GET"])
+async def server_icon(request: Request) -> FileResponse | JSONResponse:
+    """服务器图标"""
+    icon_path = Path(__file__).parent / "static" / "icon.svg"
+    if icon_path.exists():
+        return FileResponse(str(icon_path), media_type="image/svg+xml")
+    return JSONResponse({"error": "icon.svg 未找到"}, status_code=404)
+
+
 @mcp.custom_route("/oauth/callback", methods=["GET"])
 async def oauth_callback(request: Request) -> RedirectResponse | JSONResponse:
     """GitHub OAuth 回调处理（GitHub 授权后重定向到此路由）"""

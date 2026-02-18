@@ -4,6 +4,8 @@
     "version": "0.1.0",
     "description": "Enforce consistent C++ style and best practices across your codebase. Analyze naming conventions, memory safety, and const correctness, and get actionable modernization suggestions up to C++23."
   },
+  "iconUrl": "https://cpp-style-guide-mcp.fly.dev/icon.svg",
+  "documentationUrl": "https://github.com/SongJiangzhou/cpp_guidelines_mcp",
   "authentication": {
     "type": "none"
   },
