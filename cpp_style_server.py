@@ -63,11 +63,14 @@ if _GITHUB_CLIENT_ID and _GITHUB_CLIENT_SECRET:
     )
 
 # 创建 MCP 服务器实例
+# stateless_http=True：每个请求独立处理，无需 session ID
+# 使 Smithery 扫描器可以直接查询 tools/list 等端点
 mcp = FastMCP(
     "C++ Style Guide Server",
     auth_server_provider=_oauth_provider,
     token_verifier=ProviderTokenVerifier(_oauth_provider) if _oauth_provider else None,
     auth=_auth_settings,
+    stateless_http=True,
 )
 
 
