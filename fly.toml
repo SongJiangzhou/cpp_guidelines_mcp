@@ -1,24 +1,22 @@
 # Fly.io 部署配置
 # 文档: https://fly.io/docs/reference/configuration/
-# 部署命令: fly deploy
-# 首次创建: fly launch --no-deploy --name cpp-style-guide-mcp
 
-app = "cpp-style-guide-mcp"
-primary_region = "nrt"  # 东京节点，亚洲延迟最低
+app = 'cpp-style-guide-mcp'
+primary_region = 'nrt'
 
 [build]
   dockerfile = "Dockerfile"
 
 [env]
   MCP_TRANSPORT = "streamable-http"
-  PORT = "8080"
+  PORT = "8000"
   MCP_SERVER_URL = "https://cpp-style-guide-mcp.fly.dev"
 
 [http_service]
-  internal_port = 8080
+  internal_port = 8000
   force_https = true
-  auto_stop_machines = "stop"   # 无请求时自动停机（节省免费额度）
-  auto_start_machines = true    # 有请求时自动启动
+  auto_stop_machines = "stop"
+  auto_start_machines = true
   min_machines_running = 0
 
   [[http_service.checks]]
