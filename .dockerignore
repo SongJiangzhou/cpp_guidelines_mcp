@@ -27,6 +27,9 @@ ENV/
 # CI/CD
 .github/
 
+# 其他工具配置
+.gemini/
+
 # Temporary files
 *.log
 .DS_Store

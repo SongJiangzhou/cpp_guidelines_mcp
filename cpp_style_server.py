@@ -279,10 +279,21 @@ if __name__ == "__main__":
     if transport == "streamable-http":
         # HTTP 模式：使用 uvicorn 手动启动以支持 PORT 环境变量
         import uvicorn
+        from starlette.applications import Starlette
+        from starlette.responses import JSONResponse
+        from starlette.routing import Mount, Route
+
         port = int(os.environ.get("PORT", "8000"))
 
-        # 获取 FastMCP 的 streamable HTTP 应用
-        app = mcp.streamable_http_app
+        # 健康检查端点（供 Railway 等平台使用）
+        async def health(request):
+            return JSONResponse({"status": "ok", "service": "cpp-style-guide-mcp"})
+
+        # 用 Starlette 包装，挂载健康检查和 MCP 应用
+        app = Starlette(routes=[
+            Route("/health", health),
+            Mount("/", app=mcp.streamable_http_app),
+        ])
 
         # 启动服务器
         uvicorn.run(app, host="0.0.0.0", port=port)
