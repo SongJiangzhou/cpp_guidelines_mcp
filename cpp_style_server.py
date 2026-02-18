@@ -5,10 +5,11 @@ C++ 编码规范 MCP 服务器
 """
 
 import os
+from pathlib import Path
 
 from mcp.server.fastmcp import FastMCP
 from starlette.requests import Request
-from starlette.responses import JSONResponse, RedirectResponse
+from starlette.responses import FileResponse, JSONResponse, RedirectResponse
 
 # 导入工具模块
 from cpp_style.tools.naming_checker import get_checker as get_naming_checker
@@ -81,6 +82,15 @@ async def health_check(request: Request) -> JSONResponse:
         "service": "cpp-style-guide-mcp",
         "auth": "github" if auth_enabled else "disabled",
     })
+
+
+@mcp.custom_route("/.well-known/mcp/server-card.json", methods=["GET"])
+async def server_card(request: Request) -> FileResponse | JSONResponse:
+    """Smithery 服务器元数据（用于 Smithery 平台展示）"""
+    card_path = Path(__file__).parent / "static" / ".well-known" / "mcp" / "server-card.json"
+    if card_path.exists():
+        return FileResponse(str(card_path), media_type="application/json")
+    return JSONResponse({"error": "server-card.json 未找到"}, status_code=404)
 
 
 @mcp.custom_route("/oauth/callback", methods=["GET"])
